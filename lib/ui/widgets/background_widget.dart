@@ -17,13 +17,6 @@ class BackgroundWidget extends StatelessWidget {
           width: double.maxFinite,
           fit: BoxFit.cover,
         ),
-        // Center(
-        //   child: SvgPicture.asset(
-        //     AssetPaths.appLogoSvg,
-        //     width: 140,
-        //   ),
-        // ),
-
         child
 
       ],
