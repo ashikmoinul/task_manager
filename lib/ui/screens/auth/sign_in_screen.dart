@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:task_manager/ui/screens/auth/email_verification_screen.dart';
 import 'package:task_manager/ui/screens/auth/sign_up_screen.dart';
+import 'package:task_manager/ui/screens/main_bottom_nav_screen.dart';
 import 'package:task_manager/ui/utility/app_colors.dart';
 import 'package:task_manager/ui/widgets/background_widget.dart';
 
@@ -13,8 +14,8 @@ class SignInScreen extends StatefulWidget {
 }
 
 class _SignInScreenState extends State<SignInScreen> {
-   final TextEditingController _emailTEController = TextEditingController();
-   final TextEditingController _passwordTEController = TextEditingController();
+  final TextEditingController _emailTEController = TextEditingController();
+  final TextEditingController _passwordTEController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +49,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   ),
                   const SizedBox(height: 16),
                   ElevatedButton(
-                    onPressed: () {},
+                    onPressed: _onTapNextButton,
                     child: const Icon(Icons.arrow_circle_right_outlined),
                   ),
                   const SizedBox(height: 36),
@@ -74,8 +75,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                     color: AppColors.themeColor,
                                   ),
                                   recognizer: TapGestureRecognizer()
-                                    ..onTap =
-                                        _onTapSignUpButton),
+                                    ..onTap = _onTapSignUpButton),
                             ],
                           ),
                         ),
@@ -87,6 +87,15 @@ class _SignInScreenState extends State<SignInScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  void _onTapNextButton() {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const MainBottomNavScreen(),
       ),
     );
   }
@@ -108,8 +117,6 @@ class _SignInScreenState extends State<SignInScreen> {
       ),
     );
   }
-
-
 
   @override
   void dispose() {

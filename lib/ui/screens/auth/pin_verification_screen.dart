@@ -1,7 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
-import 'package:task_manager/ui/screens/auth/password_reset_screen.dart';
+import 'package:task_manager/ui/screens/auth/reset_password_screen.dart';
 import 'package:task_manager/ui/screens/auth/sign_in_screen.dart';
 import 'package:task_manager/ui/utility/app_colors.dart';
 import 'package:task_manager/ui/widgets/background_widget.dart';
@@ -108,6 +108,7 @@ class _PinVerificationScreenState extends State<PinVerificationScreen> {
       // errorAnimationController: errorController,
       controller: _pinTEController,
       appContext: context,
+      autoDisposeControllers: false,
     );
   }
 
