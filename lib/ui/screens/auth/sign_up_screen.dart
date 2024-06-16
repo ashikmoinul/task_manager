@@ -1,7 +1,12 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:task_manager/data/models/network_response.dart';
+import 'package:task_manager/data/network_caller/network_caller.dart';
+import 'package:task_manager/data/utilities/urls.dart';
 import 'package:task_manager/ui/utility/app_colors.dart';
+import 'package:task_manager/ui/utility/app_constants.dart';
 import 'package:task_manager/ui/widgets/background_widget.dart';
+import 'package:task_manager/ui/widgets/snack_bar_message.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -11,16 +16,14 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-   final TextEditingController _emailTEController =
-      TextEditingController();
-   final TextEditingController _passwordTEController =
-      TextEditingController();
-   final TextEditingController _firstNameTEController =
-      TextEditingController();
-   final TextEditingController _lastNameTEController =
-      TextEditingController();
-   final TextEditingController _mobileTEController =
-      TextEditingController();
+  final TextEditingController _emailTEController = TextEditingController();
+  final TextEditingController _passwordTEController = TextEditingController();
+  final TextEditingController _firstNameTEController = TextEditingController();
+  final TextEditingController _lastNameTEController = TextEditingController();
+  final TextEditingController _mobileTEController = TextEditingController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  bool _showPassword = false;
+  bool _registrationInProgress = false;
 
   @override
   Widget build(BuildContext context) {
@@ -30,59 +33,121 @@ class _SignUpScreenState extends State<SignUpScreen> {
           child: SingleChildScrollView(
             child: Padding(
               padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 100),
-                  Text(
-                    'Join With Us',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 24),
-                  TextFormField(
-                    controller: _emailTEController,
-                    keyboardType: TextInputType.emailAddress,
-                    decoration: InputDecoration(
-                      hintText: 'Email',
+              child: Form(
+                key: _formKey,
+                autovalidateMode: AutovalidateMode.onUserInteraction,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 100),
+                    Text(
+                      'Join With Us',
+                      style: Theme.of(context).textTheme.titleLarge,
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _firstNameTEController,
-                    decoration: InputDecoration(
-                      hintText: 'First Name',
+                    const SizedBox(height: 24),
+                    TextFormField(
+                      controller: _emailTEController,
+                      keyboardType: TextInputType.emailAddress,
+                      decoration: const InputDecoration(hintText: 'Email'),
+                      validator: (String? value) {
+                        if (value?.trim().isEmpty ?? true) {
+                          return 'Enter Your Email Address';
+                        }
+                        if (AppConstants.emailRegExp.hasMatch(value!) == false) {
+                          return 'Enter a valid email address';
+                        }
+                        return null;
+                      },
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _lastNameTEController,
-                    decoration: InputDecoration(
-                      hintText: 'Last Name',
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _firstNameTEController,
+                      decoration: const InputDecoration(
+                        hintText: 'First Name',
+                      ),
+                      validator: (String? value) {
+                        if (value?.trim().isEmpty ?? true) {
+                          return 'Enter your first name';
+                        }
+                        return null;
+                      },
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _mobileTEController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      hintText: 'Mobile Number',
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _lastNameTEController,
+                      decoration: const InputDecoration(
+                        hintText: 'Last Name',
+                      ),
+                      validator: (String? value) {
+                        if (value?.trim().isEmpty ?? true) {
+                          return 'Enter your last name';
+                        }
+                        return null;
+                      },
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextFormField(
-                    controller: _passwordTEController,
-                    decoration: InputDecoration(
-                      hintText: 'Password',
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _mobileTEController,
+                      keyboardType: TextInputType.number,
+                      decoration: const InputDecoration(
+                        hintText: 'Mobile Number',
+                      ),
+                      validator: (String? value) {
+                        if (value?.trim().isEmpty ?? true) {
+                          return 'Enter your mobile number';
+                        }
+                        // if (AppConstants.mobileRegExp.hasMatch(value!) == false) {
+                        //   return 'Enter a valid phone number';
+                        // }
+                        return null;
+                      },
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () {},
-                    child: const Icon(Icons.arrow_circle_right_outlined),
-                  ),
-                  const SizedBox(height: 36),
-                  _buildBackToSignInSection(),
-                ],
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      obscureText: _showPassword == false,
+                      controller: _passwordTEController,
+                      decoration: InputDecoration(
+                        hintText: 'Password',
+                        suffixIcon: IconButton(
+                          onPressed: () {
+                            _showPassword = !_showPassword;
+                            if (mounted) {
+                              setState(
+                                () {},
+                              );
+                            }
+                          },
+                          icon: Icon(_showPassword
+                              ? Icons.visibility_off
+                              : Icons.remove_red_eye),
+                        ),
+                      ),
+                      validator: (String? value) {
+                        if (value?.trim().isEmpty ?? true) {
+                          return 'Enter your password';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    Visibility(
+                       visible: _registrationInProgress == false,
+                      replacement: const Center(
+                        child: CircularProgressIndicator(),
+                      ),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (_formKey.currentState!.validate()) {
+                            _registerUser();
+                          }
+                        },
+                        child: const Icon(Icons.arrow_circle_right_outlined),
+                      ),
+                    ),
+                    const SizedBox(height: 36),
+                    _buildBackToSignInSection(),
+                  ],
+                ),
               ),
             ),
           ),
@@ -107,7 +172,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
               style: const TextStyle(
                 color: AppColors.themeColor,
               ),
-              recognizer: TapGestureRecognizer()..onTap = _backToSignInButton,
+              recognizer: TapGestureRecognizer()..onTap = _onTapSignInButton,
             ),
           ],
         ),
@@ -115,7 +180,49 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  void _backToSignInButton() {
+  Future<void> _registerUser() async {
+    _registrationInProgress = true;
+    if (mounted) {
+      setState(() {});
+    }
+    Map<String, dynamic> requestInput = {
+      "email": _emailTEController.text.trim(),
+      "firstName": _firstNameTEController.text.trim(),
+      "lastName": _lastNameTEController.text.trim(),
+      "mobile": _mobileTEController.text.trim(),
+      "password": _passwordTEController.text.trim(),
+      "photo": ""
+    };
+    NetworkResponse response =
+        await NetworkCaller.postRequest(Urls.registration, body: requestInput);
+    _registrationInProgress = false;
+    if (mounted) {
+      setState(() {});
+    }
+    if (response.isSuccess) {
+      _clearTextFields();
+      if (mounted) {
+        showSnackBarMessage(context, 'Registration success');
+      }
+    } else {
+      if (mounted) {
+        showSnackBarMessage(
+          context,
+          response.errorMessage ?? 'Registration failed! Try again',
+        );
+      }
+    }
+  }
+
+  void _clearTextFields() {
+    _emailTEController.clear();
+    _firstNameTEController.clear();
+    _lastNameTEController.clear();
+    _mobileTEController.clear();
+    _passwordTEController.clear();
+  }
+
+  void _onTapSignInButton() {
     Navigator.pop(context);
   }
 
