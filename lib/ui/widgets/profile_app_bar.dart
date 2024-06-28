@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:task_manager/ui/controllers/auth_controller.dart';
+import 'package:task_manager/ui/screens/auth/sign_in_screen.dart';
 import 'package:task_manager/ui/screens/update_profile_screen.dart';
 import 'package:task_manager/ui/utility/app_colors.dart';
 
@@ -8,7 +10,7 @@ AppBar profileAppBar(context, [bool fromUpdateProfile = false]) {
     backgroundColor: AppColors.themeColor,
     leading: GestureDetector(
       onTap: () {
-        if (fromUpdateProfile){
+        if (fromUpdateProfile) {
           return;
         }
         Navigator.push(
@@ -25,7 +27,7 @@ AppBar profileAppBar(context, [bool fromUpdateProfile = false]) {
     ),
     title: GestureDetector(
       onTap: () {
-        if (fromUpdateProfile){
+        if (fromUpdateProfile) {
           return;
         }
         Navigator.push(
@@ -35,19 +37,19 @@ AppBar profileAppBar(context, [bool fromUpdateProfile = false]) {
           ),
         );
       },
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Dummy Name',
-            style: TextStyle(
+            AuthController.userData?.fullName ?? '',
+            style: const TextStyle(
               fontSize: 16,
               color: Colors.white,
             ),
           ),
           Text(
-            'email@gmail.com',
-            style: TextStyle(
+            AuthController.userData?.email ?? '',
+            style: const TextStyle(
               fontSize: 12,
               color: Colors.white,
               fontWeight: FontWeight.w500,
@@ -58,7 +60,13 @@ AppBar profileAppBar(context, [bool fromUpdateProfile = false]) {
     ),
     actions: [
       IconButton(
-        onPressed: () {},
+        onPressed: () async {
+          await AuthController.clearAllData();
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const SignInScreen()),
+              (route) => false);
+        },
         icon: const Icon(Icons.logout),
       ),
     ],

@@ -38,12 +38,11 @@ class _MainBottomNavScreenState extends State<MainBottomNavScreen> {
         },
         selectedItemColor: AppColors.themeColor,
         unselectedItemColor: Colors.grey,
-        showSelectedLabels: false,
+        showSelectedLabels: true,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.abc), label: 'New Task'),
           BottomNavigationBarItem(icon: Icon(Icons.done), label: 'Completed'),
-          BottomNavigationBarItem(
-              icon: Icon(Icons.ac_unit), label: 'In Progress'),
+          BottomNavigationBarItem(icon: Icon(Icons.ac_unit), label: 'In Progress'),
           BottomNavigationBarItem(icon: Icon(Icons.close), label: 'Cancelled'),
         ],
       ),
