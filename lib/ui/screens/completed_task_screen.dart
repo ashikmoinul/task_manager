@@ -48,6 +48,7 @@ class _CompletedTaskScreenState extends State<CompletedTaskScreen> {
     );
   }
   Future<void> _getCompletedTasks() async {
+
     _getCompletedTasksInProgress = true;
     if (mounted) {
       setState(() {});
