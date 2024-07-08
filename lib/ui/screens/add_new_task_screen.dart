@@ -15,10 +15,13 @@ class AddNewTaskScreen extends StatefulWidget {
 
 class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
   final TextEditingController _titleTEController = TextEditingController();
-  final TextEditingController _descriptionTEController =
-      TextEditingController();
+  final TextEditingController _descriptionTEController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _addNewTaskInProgress = false;
+  bool _addCompletedTaskInProgress = false;
+  bool _addInProgressTaskInProgress = false;
+  bool _addCancelledTaskInProgress = false;
+
 
   @override
   Widget build(BuildContext context) {
@@ -66,11 +69,15 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
                       onPressed: () {
                         if (_formKey.currentState!.validate()) {
                           _addNewTask();
+                          // _addCompletedTask();
+                          // _addInProgressTask();
+                          // _addCancelledTask();
                         }
                       },
                       child: const Text('Add'),
                     ),
                   ),
+
                 ],
               ),
             ),
@@ -100,6 +107,7 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
       setState(() {});
     }
 
+
     if (response.isSuccess) {
       _clearTextFields();
       if (mounted) {
@@ -111,6 +119,111 @@ class _AddNewTaskScreenState extends State<AddNewTaskScreen> {
       }
     }
   }
+
+
+
+  Future<void> _addCompletedTask() async {
+    _addCompletedTaskInProgress = true;
+    if (mounted) {
+      setState(() {});
+    }
+    Map<String, dynamic> requestData = {
+      "title": _titleTEController.text.trim(),
+      "description": _descriptionTEController.text.trim(),
+      "status": "Complete"
+    };
+    NetworkResponse response = await NetworkCaller.postRequest(
+      Urls.createTask,
+      body: requestData,
+    );
+
+    _addCompletedTaskInProgress = false;
+    if (mounted) {
+      setState(() {});
+    }
+
+
+    if (response.isSuccess) {
+      _clearTextFields();
+      if (mounted) {
+        showSnackBarMessage(context, 'New Completed Task added!');
+      } else {
+        if (mounted) {
+          showSnackBarMessage(context, 'New Completed Task add failed! Try again.', true);
+        }
+      }
+    }
+  }
+
+  Future<void> _addInProgressTask() async {
+    _addInProgressTaskInProgress = true;
+    if (mounted) {
+      setState(() {});
+    }
+    Map<String, dynamic> requestData = {
+      "title": _titleTEController.text.trim(),
+      "description": _descriptionTEController.text.trim(),
+      "status": "In Progress"
+    };
+    NetworkResponse response = await NetworkCaller.postRequest(
+      Urls.createTask,
+      body: requestData,
+    );
+
+    _addInProgressTaskInProgress = false;
+    if (mounted) {
+      setState(() {});
+    }
+
+
+    if (response.isSuccess) {
+      _clearTextFields();
+      if (mounted) {
+        showSnackBarMessage(context, 'New Task added!');
+      } else {
+        if (mounted) {
+          showSnackBarMessage(context, 'New Task add failed! Try again.', true);
+        }
+      }
+    }
+  }
+
+
+  Future<void> _addCancelledTask() async {
+    _addCancelledTaskInProgress = true;
+    if (mounted) {
+      setState(() {});
+    }
+    Map<String, dynamic> requestData = {
+      "title": _titleTEController.text.trim(),
+      "description": _descriptionTEController.text.trim(),
+      "status": "Cancelled"
+    };
+    NetworkResponse response = await NetworkCaller.postRequest(
+      Urls.createTask,
+      body: requestData,
+    );
+
+    _addCancelledTaskInProgress = false;
+    if (mounted) {
+      setState(() {});
+    }
+
+
+    if (response.isSuccess) {
+      _clearTextFields();
+      if (mounted) {
+        showSnackBarMessage(context, 'In progress added!');
+      } else {
+        if (mounted) {
+          showSnackBarMessage(context, 'In progress add failed! Try again.', true);
+        }
+      }
+    }
+  }
+
+
+
 
   void _clearTextFields() {
     _titleTEController.clear();

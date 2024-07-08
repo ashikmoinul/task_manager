@@ -54,4 +54,5 @@ class AuthController {
     userData = await getUserData();
     return true;
   }
+
 }
