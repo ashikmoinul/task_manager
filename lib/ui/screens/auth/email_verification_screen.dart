@@ -3,18 +3,23 @@ import 'package:flutter/material.dart';
 import 'package:task_manager/ui/screens/auth/pin_verification_screen.dart';
 import 'package:task_manager/ui/utility/app_colors.dart';
 import 'package:task_manager/ui/widgets/background_widget.dart';
+import 'package:task_manager/ui/widgets/centered_progress_indicator.dart';
+import '../../../data/models/network_response.dart';
+import '../../../data/network_caller/network_caller.dart';
+import '../../../data/utilities/urls.dart';
+import '../../widgets/snack_bar_message.dart';
 
 class EmailVerificationScreen extends StatefulWidget {
   const EmailVerificationScreen({super.key});
 
   @override
-  State<EmailVerificationScreen> createState() => _EmailVerificationScreenState();
+  State<EmailVerificationScreen> createState() =>
+      _EmailVerificationScreenState();
 }
 
 class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
-   final TextEditingController _emailTEController = TextEditingController();
-
-
+  final TextEditingController _emailTEController = TextEditingController();
+  bool _emailVerificationInProgress = false;
 
   @override
   Widget build(BuildContext context) {
@@ -51,9 +56,13 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                   //   ),
                   // ),
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _onTapConfirmButton,
-                    child: const Icon(Icons.arrow_circle_right_outlined),
+                  Visibility(
+                    visible: _emailVerificationInProgress == false,
+                    replacement: const CenteredProgressIndicator(),
+                    child: ElevatedButton(
+                      onPressed: _onTapConfirmButton,
+                      child: const Icon(Icons.arrow_circle_right_outlined),
+                    ),
                   ),
                   const SizedBox(height: 36),
                   Center(
@@ -78,8 +87,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                                     color: AppColors.themeColor,
                                   ),
                                   recognizer: TapGestureRecognizer()
-                                    ..onTap =
-                                        _onTapSignInButton),
+                                    ..onTap = _onTapSignInButton),
                             ],
                           ),
                         ),
@@ -100,12 +108,37 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
   }
 
   void _onTapConfirmButton() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const PinVerificationScreen(),
-      ),
-    );
+    _verifyEmail(_emailTEController.text.trim());
+  }
+
+  Future<void> _verifyEmail(String email) async {
+    _emailVerificationInProgress = true;
+    if (mounted) {
+      setState(() {});
+    }
+    NetworkResponse response =
+        await NetworkCaller.getRequest(Urls.verifyEmail(email));
+    _emailVerificationInProgress = false;
+
+    if (mounted) {
+      setState(() {});
+    }
+
+    if (response.isSuccess && response.responseData['status'] == 'success') {
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PinVerificationScreen(email: email),
+          ),
+        );
+      }
+    } else {
+      if (mounted) {
+        showSnackBarMessage(context,
+            response.errorMessage ?? 'Email verification failed! Try again.');
+      }
+    }
   }
 
   @override

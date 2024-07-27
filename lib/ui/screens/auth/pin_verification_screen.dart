@@ -1,16 +1,20 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
-import 'package:task_manager/data/models/network_response.dart';
-import 'package:task_manager/data/network_caller/network_caller.dart';
-import 'package:task_manager/data/utilities/urls.dart';
 import 'package:task_manager/ui/screens/auth/reset_password_screen.dart';
 import 'package:task_manager/ui/screens/auth/sign_in_screen.dart';
 import 'package:task_manager/ui/utility/app_colors.dart';
 import 'package:task_manager/ui/widgets/background_widget.dart';
+import 'package:task_manager/ui/widgets/centered_progress_indicator.dart';
+
+import '../../../data/models/network_response.dart';
+import '../../../data/network_caller/network_caller.dart';
+import '../../../data/utilities/urls.dart';
+import '../../widgets/snack_bar_message.dart';
 
 class PinVerificationScreen extends StatefulWidget {
-  const PinVerificationScreen({super.key});
+  const PinVerificationScreen({super.key, required this.email});
+  final String email;
 
   @override
   State<PinVerificationScreen> createState() => _PinVerificationScreenState();
@@ -18,7 +22,7 @@ class PinVerificationScreen extends StatefulWidget {
 
 class _PinVerificationScreenState extends State<PinVerificationScreen> {
   final TextEditingController _pinTEController = TextEditingController();
-  bool _loadingInProgress = false;
+  bool _otpVerificationInProgress = false;
 
   @override
   Widget build(BuildContext context) {
@@ -45,9 +49,13 @@ class _PinVerificationScreenState extends State<PinVerificationScreen> {
                   _buildPinCodeTextField(), //Don't need context because of it's a stateful widget
 
                   const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: _onTapVerifyOtpButton,
-                    child: const Text('Verify'),
+                  Visibility(
+                    visible: _otpVerificationInProgress == false,
+                    replacement: const CenteredProgressIndicator(),
+                    child: ElevatedButton(
+                      onPressed: _onTapVerifyOtpButton,
+                      child: const Text('Verify'),
+                    ),
                   ),
 
                   const SizedBox(height: 36),
@@ -90,8 +98,6 @@ class _PinVerificationScreenState extends State<PinVerificationScreen> {
     );
   }
 
-
-
   Widget _buildPinCodeTextField() {
     return PinCodeTextField(
       length: 6,
@@ -128,119 +134,42 @@ class _PinVerificationScreenState extends State<PinVerificationScreen> {
     );
   }
 
-  /**/
+  void _onTapVerifyOtpButton() {
+    _verifyOtp(_pinTEController.text);
+  }
 
-  void _otpVerification() async {
-    _loadingInProgress = true;
-
-    String otp = _pinTEController.text.trim();
-
-    loadingDialog(context);
-
-    String url = "${Urls.recoverVerifyOTP}/${widget.email}/$otp";
-    NetworkResponse response = await NetworkCaller.getResponse(url);
-
-    _loadingInProgress = false;
+  Future<void> _verifyOtp(String otp) async {
+    _otpVerificationInProgress = true;
+    if (mounted) {
+      setState(() {});
+    }
+    NetworkResponse response = await NetworkCaller.getRequest(
+      Urls.verifyOtp(widget.email, otp),
+    );
+    _otpVerificationInProgress = false;
 
     if (mounted) {
-      Navigator.pop(context);
+      setState(() {});
     }
 
-    if (response.responseData['status'] == 'success') {
-      _clearOtpField();
+    if (response.isSuccess && response.responseData['status'] == 'success') {
       if (mounted) {
-        _onTapVerifyOtpButton.onTap(
+        Navigator.push(
           context,
-          widget.email,
-          otp,
-        );
-      }
-    } else if (response.responseData['status'] == 'fail') {
-      _clearOtpField();
-      if (mounted) {
-        oneButtonDialog(
-          context,
-          AppColors.themeColor,
-          "Failed!",
-          "Please enter valid otp!",
-          Icons.error_outline_rounded,
-              () {
-            Navigator.pop(context);
-          },
+          MaterialPageRoute(
+            builder: (context) => ResetPasswordScreen(
+              email: widget.email,
+              otp: otp,
+            ),
+          ),
         );
       }
     } else {
-      _clearOtpField();
-
       if (mounted) {
-        oneButtonDialog(
-          context,
-
-          AppColors.themeColor,
-          "Failed!",
-          "Something went wrong!",
-          Icons.error_outline_rounded,
-              () {
-            Navigator.pop(context);
-          },
-        );
+        showSnackBarMessage(context,
+            response.errorMessage ?? 'Otp verification failed! Try again.');
       }
     }
-  }
-
-  void _resendOtp() async {
-    _loadingInProgress = true;
-
-    loadingDialog(context);
-
-    NetworkResponse response = await NetworkCaller.getResponse(
-      "${ApiUrl.recoverVerifyEmail}/${widget.email}",
-    );
-
-    _loadingInProgress = false;
-
-    if (mounted) {
-      Navigator.pop(context);
-    }
-
-    if (response.responseData['status'] == 'success') {
-      if (mounted) {
-        _onTapVerifyOtpButton(
-          context,
-          AppColors.themeColor,
-          AppColors.themeColor,
-          "Resend success!",
-          "Please check your email and collect otp.",
-          Icons.task_alt,
-              () {
-            Navigator.pop(context);
-          },
-        );
-      }
-    }else {
-      if (mounted) {
-        oneButtonDialog(
-          context,
-          AppColors.white,
-          AppColors.themeColor,
-          "Failed!",
-          "Otp send failed, Resend again!",
-          Icons.task_alt,
-              () {
-            Navigator.pop(context);
-          },
-        );
-      }
-    }
-  }
-
-  void _onTapVerifyOtpButton() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const ResetPasswordScreen(),
-      ),
-    );
   }
 
   @override
