@@ -16,7 +16,7 @@ class NewTaskController extends GetxController{
 
   List <TaskModel>  get newTaskList => _taskList;
 
-
+  String get errorMessage => _errorMessage;
 
   Future<bool> getNewTasks() async {
     bool isSuccess = false;
